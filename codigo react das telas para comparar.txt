@@ -1,0 +1,169 @@
+VISÃO FINAL DO SISTEMA
+Mobile App (React Native)
+        ↓
+Frontend Web (React + MUI + BI)
+        ↓
+Backend API (Node + JWT + RBAC)
+        ↓
+Banco MySQL
+        ↓
+Cloud (AWS / Render / Vercel)
+🔐 1. CONTROLE DE ACESSO (RBAC PROFISSIONAL)
+👥 Perfis
+ADMIN
+LIDER
+ASSESSOR
+USUARIO
+📄 Middleware de autorização
+// backend/src/middlewares/auth.js
+const jwt = require('jsonwebtoken');
+
+module.exports = (roles = []) => {
+  return (req, res, next) => {
+    const token = req.headers.authorization;
+
+    if (!token) return res.sendStatus(401);
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (roles.length && !roles.includes(decoded.role)) {
+      return res.sendStatus(403);
+    }
+
+    req.user = decoded;
+    next();
+  };
+};
+📄 Uso nas rotas
+router.get('/admin', auth(['ADMIN']), controller);
+router.get('/lider', auth(['ADMIN', 'LIDER']), controller);
+📊 2. BI AVANÇADO (NÍVEL POWER BI)
+📄 Backend (analytics completo)
+router.get('/analytics', async (req, res) => {
+
+  const [crescimento] = await db.execute(`
+    SELECT DATE(created_at) as data, COUNT(*) total
+    FROM pessoa
+    GROUP BY DATE(created_at)
+  `);
+
+  const [heatmap] = await db.execute(`
+    SELECT latitude, longitude, COUNT(*) as peso
+    FROM evento
+    WHERE latitude IS NOT NULL
+    GROUP BY latitude, longitude
+  `);
+
+  const [ranking] = await db.execute(`
+    SELECT p.nome, COUNT(ep.evento_id) as presencas
+    FROM pessoa p
+    JOIN evento_pessoas ep ON p.id = ep.pessoa_id
+    WHERE ep.presente = true
+    GROUP BY p.nome
+    ORDER BY presencas DESC
+    LIMIT 10
+  `);
+
+  res.json({ crescimento, heatmap, ranking });
+});
+📈 Frontend BI
+import { LineChart, Line, BarChart, Bar } from 'recharts';
+
+<LineChart data={dados.crescimento}>
+  <Line dataKey="total" />
+</LineChart>
+
+<BarChart data={dados.ranking}>
+  <Bar dataKey="presencas" />
+</BarChart>
+🗺️ 3. MAPA COM HEATMAP (NÍVEL UBER)
+import { HeatmapLayer } from '@react-google-maps/api';
+
+<HeatmapLayer
+  data={dados.heatmap.map(p => ({
+    location: new google.maps.LatLng(p.latitude, p.longitude),
+    weight: p.peso
+  }))}
+/>
+📍 4. CHECK-IN INTELIGENTE (ANTI-FRAUDE)
+
+✔ GPS obrigatório
+✔ Validação de distância
+✔ Registro de horário
+✔ Possível foto
+
+📱 5. APP MOBILE COMPLETO (INTEGRADO)
+📦 Stack
+React Native (Expo)
+Mesma API
+Mesma autenticação JWT
+📄 Navegação
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+const Stack = createNativeStackNavigator();
+
+<Stack.Navigator>
+  <Stack.Screen name="Login" component={Login} />
+  <Stack.Screen name="Dashboard" component={Dashboard} />
+  <Stack.Screen name="Mapa" component={Mapa} />
+</Stack.Navigator>
+🗺️ Mapa Mobile
+import MapView, { Marker } from 'react-native-maps';
+
+<MapView style={{ flex: 1 }}>
+  {eventos.map(e => (
+    <Marker coordinate={{
+      latitude: e.latitude,
+      longitude: e.longitude
+    }} />
+  ))}
+</MapView>
+☁️ 6. DEPLOY AUTOMÁTICO (PROFISSIONAL)
+🔹 Backend → Render
+Build Command: npm install
+Start Command: node src/app.js
+🔹 Frontend → Vercel
+Conectar GitHub
+Deploy automático
+🔹 Banco → AWS RDS ou PlanetScale
+🔹 Variáveis de ambiente
+DB_HOST=
+DB_USER=
+DB_PASS=
+DB_NAME=
+JWT_SECRET=
+GOOGLE_MAPS_KEY=
+🐳 7. DOCKER (PRONTO PRA PRODUÇÃO)
+version: '3'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+📊 8. DASHBOARD FINAL (NÍVEL DIRETORIA)
+
+Inclui:
+
+✔ KPIs
+✔ Gráfico temporal
+✔ Ranking
+✔ Mapa com calor
+✔ Eventos ativos
+
+🔥 9. DIFERENCIAIS DO SEU SISTEMA
+
+Você agora tem:
+
+✅ Sistema institucional completo
+✅ Mobile + Web integrados
+✅ BI estilo Power BI
+✅ Mapa inteligente
+✅ Segurança com perfis
+✅ Arquitetura escalável
+✅ Deploy pronto

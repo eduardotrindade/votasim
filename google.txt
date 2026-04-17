@@ -1,0 +1,39 @@
+PASSO A PASSO PARA CONFIGURAR LOGIN GOOGLE
+============================================
+
+1. ACESSE O GOOGLE CLOUD CONSOLE
+   https://console.cloud.google.com/
+
+2. CRIE UM PROJETO
+   - Clique no seletor de projetos (topo)
+   - Clique em "Novo Projeto"
+   - Dê um nome ao projeto e clique em "Criar"
+
+3. CRIE CREDENCIAIS
+   - Vá em APIs e Serviços > Credenciais
+   - Clique em "Criar Credenciais" > "ID do cliente OAuth"
+   - Tipo de aplicação: Aplicativo da Web
+
+4. CONFIGURAR URIs AUTORIZADOS
+   - URI de redirecionamento autorizado:
+     http://localhost:5173/auth/google/callback
+   
+   - URI de origem JavaScript autorizado:
+     http://localhost:5173
+
+5. OBTENHA O CLIENT ID
+   Após criar, você receberá um Client ID como:
+   123456789-abcdefghijklmnop.apps.googleusercontent.com
+
+6. ADICIONE NO FRONTEND
+   Edite o arquivo: frontend/.env
+   Adicione a linha:
+   VITE_GOOGLE_CLIENT_ID=seu_client_id_aqui
+
+7. REINICIE O SERVIDOR FRONTEND
+   Após alterar o .env, reinicie o npm run dev
+
+NOTAS:
+- O login Google cria usuário automaticamente se não existir
+- Usuário será criado com papel_id = 0 (pendente)
+- Admin precisará ativar o usuário em "Configurações > Usuários"

@@ -1,0 +1,17 @@
+node_modules/
+*.sqlite
+*.sqlite3
+.env
+.env.local
+.DS_Store
+Thumbs.db
+uploads/
+dist/
+.vite/
+*.log
+VotaSimTheique-release*.apk
+extracted-apk/
+vota-sim-flutter/
+DB/
+BKP/
+*.backup

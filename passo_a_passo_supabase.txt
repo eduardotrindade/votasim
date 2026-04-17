@@ -1,0 +1,37 @@
+PASSO A PASSO - CONFIGURAR SUPABASE
+==================================
+
+1. CRIAR PROJETO NO SUPABASE
+- Acesse https://supabase.com
+- Clique em "New project"
+- Preencha:
+  * Name: Vota Sim Marcio
+  * Email: seu email
+  * Password: ANOTE ESSA SENHA!
+
+2. PEGAR CREDENCIAIS
+- Projeto criado -> Settings -> API
+- Copie a Project URL (ex: https://xxxxx.supabase.co)
+- Copie a anon public key (começa com eyJ...)
+
+3. ATUALIZAR NO FLUTTER
+- Abra o arquivo: vota-sim-flutter\lib\main.dart
+- Atualize a URL e anonKey com as do seu projeto
+
+4. CRIAR AS TABELAS
+- No Supabase, va em SQL Editor
+- Copie todo o conteudo do arquivo: vota-sim-schema.sql
+- Clique em "Run"
+
+5. ATIVAR EXTENSOES (se der erro)
+Se der erro de extensões, rode primeiro no SQL Editor:
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+6. TESTAR
+Rode o app no seu celular:
+flutter run
+
+==================================
+PRONTO!

@@ -1,0 +1,42 @@
+--- Historico de conversa ---
+
+Usuario: nao entrou no sistema. vc travou.
+
+Usuario: bom salvar a conversa pq vc trava constantemente. se travar, tendremos historico.
+
+Usuario: a porta deve estar fechada ou o serviço nao foi startado
+
+Usuario: porta 5174, conexao recusada
+
+Usuario: nao entrou com a senha do admin. nao funionou ao tentar logar com o google e tb nao funcionou cadstrar usuario. nada funcionou
+
+Usuario: Admin@123
+
+RESPOSTA: A senha do admin é: Vot@sim@2026
+
+---
+ANALISE COMPARATIVA SISTEMA:
+
+TELAS IMPLEMENTADAS:
+✅ Login/Registro
+✅ Dashboard (parcial)
+✅ Criar Agrupamento
+✅ Cadastrar/Editar Pessoa
+✅ Meus Cadastros
+✅ Eventos (listar/criar/editar)
+✅ Usuários (pendentes, ativar)
+✅ Regiões/UFs
+
+TELAS FALTANDO:
+? Convite de pessoas para evento (IMPLEMENTADO)
+? Check-in com GPS (IMPLEMENTADO)
+? Fotos do evento (upload/galeria) (IMPLEMENTADO)
+? Lista de presen�a (IMPLEMENTADO)
+? Mapa com marcadores (IMPLEMENTADO)
+? BI avan�ado (heatmap, ranking) (IMPLEMENTADO)
+? Login Google (IMPLEMENTADO - configurar VITE_GOOGLE_CLIENT_ID)
+
+BANCO DE DADOS:
+✅ Schema já tem todas as tabelas principais
+✅ Necessário: campos de foto na tabela pessoa (já tem foto TEXT)
+✅ Necessário: rotas para fotos de evento

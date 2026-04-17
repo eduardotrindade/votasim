@@ -1,0 +1,204 @@
+Crie a interface completa de um sistema web e mobile responsivo com base no fluxo de telas descrito abaixo.
+
+O design deve ser moderno, institucional (estilo sistema governamental), com sidebar lateral, dashboard e navegação clara.
+
+--------------------------------------------------
+1. ESTRUTURA GERAL
+--------------------------------------------------
+
+- Layout com menu lateral (sidebar)
+- Topbar com usuário logado
+- Design clean (Material UI ou similar)
+- Mobile-first
+- Ícones e botões bem definidos
+
+--------------------------------------------------
+2. TELA 1 — LOGIN / LANDING PAGE
+--------------------------------------------------
+
+Elementos:
+- Logo do sistema
+- Campo de email
+- Campo de senha
+- Botão "Entrar"
+- Link "Esqueci a senha"
+
+Ação:
+- Autenticar usuário
+
+--------------------------------------------------
+3. TELA 2 — HOME ADMINISTRADOR (DASHBOARD)
+--------------------------------------------------
+
+Componentes:
+- Cards com indicadores:
+  - Total de pessoas
+  - Total de eventos
+  - Presenças
+- Menu de ações rápidas:
+  - Criar Agrupamento
+  - Cadastrar Pessoa
+  - Gerenciar Cadastros
+  - Eventos
+
+- Gráfico de eventos por data
+- Mapa com eventos (marcadores)
+
+--------------------------------------------------
+4. TELA 3 — CRIAR AGRUPAMENTO
+--------------------------------------------------
+
+Campos:
+- Nome do agrupamento
+- Pessoa de referência (select)
+- Região (select)
+- Endereço
+- CEP
+- Observação
+
+Botões:
+- Salvar
+- Cancelar
+
+--------------------------------------------------
+5. TELA 4 — EDITAR / CADASTRAR PESSOA
+--------------------------------------------------
+
+Campos:
+- Nome
+- Data de nascimento
+- Papel (Administrador, Assessor, Líder, Usuário)
+- Telefone
+- Email
+- Foto (upload)
+- Agrupamento (select)
+- Observação
+
+Ações:
+- Salvar
+- Editar
+- Completar cadastro
+
+--------------------------------------------------
+6. TELA 5 — MEUS CADASTROS
+--------------------------------------------------
+
+Lista de pessoas com:
+- Nome
+- Email
+- Telefone
+- Agrupamento
+
+Ações:
+- Editar
+- Visualizar
+
+Filtro:
+- Por nome
+- Por agrupamento
+
+--------------------------------------------------
+7. TELA 6 — EVENTOS
+--------------------------------------------------
+
+Funcionalidades:
+- Listar eventos
+- Criar evento
+- Editar evento
+
+Campos:
+- Título
+- Data
+- Região
+- Observação
+- Localização (mapa com seleção)
+
+--------------------------------------------------
+8. TELA 7 — CONVIDAR PESSOAS
+--------------------------------------------------
+
+Lista de pessoas com checkbox
+
+Ações:
+- Marcar como convidado
+- Vincular ao evento
+
+--------------------------------------------------
+9. TELA 8 — CHECK-IN NO EVENTO
+--------------------------------------------------
+
+Funcionalidades:
+- Botão "Fazer Check-in"
+- Captura automática de:
+  - Latitude
+  - Longitude
+  - Data/hora
+
+Exibir:
+- Status do check-in
+
+--------------------------------------------------
+10. TELA 9 — FOTOS DO EVENTO
+--------------------------------------------------
+
+- Upload de fotos
+- Galeria de imagens
+- Visualização em grid
+
+--------------------------------------------------
+11. TELA 10 — ADMINISTRATIVO
+--------------------------------------------------
+
+- Lista de convidados por evento
+- Marcar presença
+- Remover convidados
+
+--------------------------------------------------
+12. TELA 11 — USUÁRIOS
+--------------------------------------------------
+
+Subtelas:
+
+### Usuários Pendentes
+- Listagem
+- Botão "Ativar cadastro"
+
+### Ativar Assessor
+- Selecionar usuário
+- Definir papel
+
+### Ativar Líder
+- Selecionar usuário
+- Definir papel
+
+--------------------------------------------------
+13. TELA 12 — REGIÕES / UFs
+--------------------------------------------------
+
+- Lista de UFs
+- Lista de cidades
+- Lista de regiões
+
+--------------------------------------------------
+14. REGRAS IMPORTANTES
+--------------------------------------------------
+
+- Todas as telas devem ter:
+  - Botões claros
+  - Feedback visual
+  - Validação de formulário
+
+- Interface responsiva (desktop + mobile)
+- Navegação fluida entre telas
+- Uso de ícones
+
+--------------------------------------------------
+15. RESULTADO ESPERADO
+--------------------------------------------------
+
+Gerar:
+- Telas completas
+- Componentes reutilizáveis
+- Navegação funcional
+- Layout profissional
+- Pronto para desenvolvimento React ou React Native
