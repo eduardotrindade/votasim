@@ -1,42 +1,81 @@
---- Historico de conversa ---
+# Histórico - VotaSimByMarcio
 
-Usuario: nao entrou no sistema. vc travou.
+## Data: 20/04/2026
 
-Usuario: bom salvar a conversa pq vc trava constantemente. se travar, tendremos historico.
+### Migração: VotaSimByFotos → VotaSimByMarcio (PostgreSQL/Supabase)
 
-Usuario: a porta deve estar fechada ou o serviço nao foi startado
+#### Contexto
+- Código do votasimbyfotos trazido para este projeto
+- Sistema adaptado para PostgreSQL/Supabase (não SQLite)
+- Deploy preparação para Web (Render + Vercel)
 
-Usuario: porta 5174, conexao recusada
+#### O que foi migrado do votasimbyfotos:
 
-Usuario: nao entrou com a senha do admin. nao funionou ao tentar logar com o google e tb nao funcionou cadstrar usuario. nada funcionou
+**Backend (9 rotas):**
+- auth.js - autenticação JWT
+- pessoas.js - CRUD pessoas
+- eventos.js - CRUD eventos + check-in + convite
+- agrupamentos.js - CRUD agrupamentos
+- regioes.js - UFs, cidades, regiões
+- dashboard.js - estatísticas
+- upload.js - upload de fotos
+- Papeis.js - papéis de usuário
+- vinculos.js - relações entre pessoas
 
-Usuario: Admin@123
+**Frontend (21 páginas):**
+- Login, Register, RoleSelection
+- Dashboard (com gráficos)
+- PessoasPage, PessoaForm
+- EventosPage, EventoForm, EventoDetalhePage
+- CheckinPage, ConvitePessoasPage, FotosEventoPage
+- AgrupamentosPage, AgrupamentoForm
+- VinculosPage (NOVO)
+- RankingPage, MapaPage
+- ImportCSVPage, ProfilePage
+- UsuariosPage, AdministrativoPage
 
-RESPOSTA: A senha do admin é: Vot@sim@2026
+#### Alterações para PostgreSQL/Supabase:
+
+**Arquivos criados:**
+- backend/src/config/supabase.js - Cliente Supabase
+- backend/src/config/db.js - Pool PostgreSQL
+- backend/src/config/postgresSchema.js - Schema do banco
+- backend/src/setup.js - Script de inicialização
+- backend/.env - Variáveis de ambiente
+- frontend/.env - Variáveis do frontend
+
+**Arquivos atualizados:**
+- backend/package.json - Adicionado pg, @supabase/supabase-js
+- backend/src/app.js - Usa PostgreSQL
+- Todas as rotas - Usam PostgreSQL (async/await + $1, $2 params)
+- middlewares/auth.js - JWT_SECRET correto
+- DEPLOY.md - Instruções atualizadas
+
+#### Credenciais (do historico anterior):
+
+- **Supabase URL**: https://ichogtsktsvmeyiyyoem.supabase.co
+- **JWT_SECRET**: keXNwLSmrkbLQ74xF7O2VYr0ezKWvU2QXZ5DZyB682uJaj8Hz5N5zqA2Ge3y4Day564LPWRhlKbWd0c40aCFAQ==
+- **Backend URL**: https://votasim.onrender.com
+- **Frontend URL**: https://votasim.onrender.com (mesmo)
+
+#### Deploy:
+
+- GitHub: https://github.com/eduardotrindade/votasim
+- Commit: 172f691
+
+#### Próximos Passos:
+
+1. Redeploy Backend no Render
+2. Redeploy Frontend no Vercel
+3. Executar node setup.js para criar tabelas (ou usar schema no Supabase)
 
 ---
-ANALISE COMPARATIVA SISTEMA:
 
-TELAS IMPLEMENTADAS:
-✅ Login/Registro
-✅ Dashboard (parcial)
-✅ Criar Agrupamento
-✅ Cadastrar/Editar Pessoa
-✅ Meus Cadastros
-✅ Eventos (listar/criar/editar)
-✅ Usuários (pendentes, ativar)
-✅ Regiões/UFs
+## Histórico Anterior (referências):
 
-TELAS FALTANDO:
-? Convite de pessoas para evento (IMPLEMENTADO)
-? Check-in com GPS (IMPLEMENTADO)
-? Fotos do evento (upload/galeria) (IMPLEMENTADO)
-? Lista de presen�a (IMPLEMENTADO)
-? Mapa com marcadores (IMPLEMENTADO)
-? BI avan�ado (heatmap, ranking) (IMPLEMENTADO)
-? Login Google (IMPLEMENTADO - configurar VITE_GOOGLE_CLIENT_ID)
+### Credenciais Admin:
+- Email: admin@votasim.com
+- Senha: Vot@sim@2026
 
-BANCO DE DADOS:
-✅ Schema já tem todas as tabelas principais
-✅ Necessário: campos de foto na tabela pessoa (já tem foto TEXT)
-✅ Necessário: rotas para fotos de evento
+### Senha JWT:
+- keXNwLSmrkbLQ74xF7O2VYr0ezKWvU2QXZ5DZyB682uJaj8Hz5N5zqA2Ge3y4Day564LPWRhlKbWd0c40aCFAQ==
