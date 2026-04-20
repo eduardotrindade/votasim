@@ -42,6 +42,7 @@
 - backend/src/config/postgresSchema.js - Schema do banco
 - backend/src/setup.js - Script de inicialização
 - backend/.env - Variáveis de ambiente
+- backend/render.yaml - Configuração de deploy
 - frontend/.env - Variáveis do frontend
 
 **Arquivos atualizados:**
@@ -50,23 +51,39 @@
 - Todas as rotas - Usam PostgreSQL (async/await + $1, $2 params)
 - middlewares/auth.js - JWT_SECRET correto
 - DEPLOY.md - Instruções atualizadas
+- .gitignore - Exclui arquivos .db e .env
 
 #### Credenciais (do historico anterior):
 
 - **Supabase URL**: https://ichogtsktsvmeyiyyoem.supabase.co
 - **JWT_SECRET**: keXNwLSmrkbLQ74xF7O2VYr0ezKWvU2QXZ5DZyB682uJaj8Hz5N5zqA2Ge3y4Day564LPWRhlKbWd0c40aCFAQ==
 - **Backend URL**: https://votasim.onrender.com
-- **Frontend URL**: https://votasim.onrender.com (mesmo)
 
 #### Deploy:
 
 - GitHub: https://github.com/eduardotrindade/votasim
-- Commit: 172f691
+- Commit atual: 904c3bd (com render.yaml)
+- Arquivos no Git: 80+
+
+**render.yaml** (criado para ajudar o Render a reconhecer o projeto):
+```yaml
+services:
+  - type: web
+    name: votasim-backend
+    region: oregon
+    buildCommand: npm install
+    startCommand: node src/app.js
+```
+
+#### Problemas conhecidos:
+
+- Erro antigo no Render: `GLIBC_2.38' not found` - preciso do código novo (PostgreSQL)
+- Render pode não reconhecer o git - criado render.yaml para forçar deploy
 
 #### Próximos Passos:
 
-1. Redeploy Backend no Render
-2. Redeploy Frontend no Vercel
+1. Deploy Backend no Render (usar render.yaml)
+2. Deploy Frontend no Vercel
 3. Executar node setup.js para criar tabelas (ou usar schema no Supabase)
 
 ---
