@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: votasim-backend
+    region: oregon
+    buildCommand: npm install
+    startCommand: node src/app.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: PORT
+        value: "3001"
+      - key: JWT_SECRET
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false

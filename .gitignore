@@ -3,6 +3,7 @@ node_modules/
 *.sqlite3
 .env
 .env.local
+.env.*
 .DS_Store
 Thumbs.db
 uploads/
@@ -15,3 +16,4 @@ vota-sim-flutter/
 DB/
 BKP/
 *.backup
+*.db
