@@ -1,109 +1,88 @@
-const express = require('express');
+import express from 'express';
+import { query } from '../config/db.js';
+import authMiddleware from '../middlewares/auth.js';
+
 const router = express.Router();
-const db = require('../config/db');
-const auth = require('../middlewares/auth');
 
-// Rota principal do Dashboard (stats geral)
-router.get('/', auth(), async (req, res) => {
+router.use(authMiddleware);
+
+router.get('/', async (req, res) => {
   try {
-    // Total de Pessoas Cadastradas
-    const [peopleCount] = await db.execute('SELECT COUNT(*) as total FROM pessoa WHERE ativo = 1');
+    const pessoasResult = await query('SELECT COUNT(*) as total FROM pessoa WHERE ativo = true');
+    const totalPessoas = parseInt(pessoasResult.rows[0].total);
     
-    // Total de Eventos
-    const [eventosCount] = await db.execute('SELECT COUNT(*) as total FROM evento');
+    const eventosResult = await query('SELECT COUNT(*) as total FROM evento');
+    const totalEventos = parseInt(eventosResult.rows[0].total);
     
-    // Total de Presenças em eventos
-    const [presencasCount] = await db.execute(
-      'SELECT COUNT(*) as total FROM evento_pessoas WHERE presente = 1'
-    );
-
+    const presencasResult = await query('SELECT COUNT(*) as total FROM evento_pessoas WHERE presente = true');
+    const totalPresencas = parseInt(presencasResult.rows[0].total);
+    
+    const convidadosResult = await query('SELECT COUNT(*) as total FROM evento_pessoas');
+    const totalConvidados = parseInt(convidadosResult.rows[0].total);
+    
+    const taxa = totalConvidados > 0 ? Math.round((totalPresencas / totalConvidados) * 100) : 0;
+    
     res.json({
-      totalPessoas: peopleCount[0].total,
-      totalEventos: eventosCount[0].total,
-      totalPresencas: presencasCount[0].total
+      totalPessoas,
+      totalEventos,
+      totalPresencas,
+      taxaConversao: taxa
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao buscar dados do dashboard' });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// Rota de Estatísticas Gerais para o Dashboard
-router.get('/stats', auth(), async (req, res) => {
+router.get('/stats', async (req, res) => {
   try {
-    // 1. Total de Pessoas Cadastradas
-    const [peopleCount] = await db.execute('SELECT COUNT(*) as total FROM pessoa');
+    const pessoasResult = await query('SELECT COUNT(*) as total FROM pessoa WHERE ativo = true');
+    const totalPessoas = parseInt(pessoasResult.rows[0].total);
     
-    // 2. Eventos no mês atual (SQLite)
-    const [monthEvents] = await db.execute(`
+    const eventosMesResult = await query(`
       SELECT COUNT(*) as total FROM evento 
-      WHERE strftime('%Y-%m', data) = strftime('%Y-%m', 'now')
+      WHERE TO_CHAR(TO_TIMESTAMP(data, 'YYYY-MM-DD'), 'YYYY-MM') = TO_CHAR(NOW(), 'YYYY-MM')
     `);
+    const eventosMes = parseInt(eventosMesResult.rows[0].total);
     
-    // 3. Total de Check-ins realizados
-    const [checkins] = await db.execute('SELECT COUNT(*) as total FROM evento WHERE check_in = 1');
+    const checkinsResult = await query('SELECT COUNT(*) as total FROM evento_pessoas WHERE presente = true');
+    const totalCheckins = parseInt(checkinsResult.rows[0].total);
+    
+    const presencasResult = await query('SELECT COUNT(*) as total FROM evento_pessoas WHERE presente = true');
+    const presencas = parseInt(presencasResult.rows[0].total);
+    
+    const convidadosResult = await query('SELECT COUNT(*) as total FROM evento_pessoas');
+    const convidados = parseInt(convidadosResult.rows[0].total);
+    
+    const engajamento = convidados > 0 ? Math.round((presencas / convidados) * 100) : 0;
 
-    // 4. Dados para o Gráfico (Crescimento de Cadastros nos últimos 6 meses)
-    // Agrupando por mês
-    const [graphData] = await db.execute(`
+    const graphResult = await query(`
       SELECT 
-        strftime('%m/%Y', created_at) as name, 
-        COUNT(*) as cadastros 
-      FROM pessoa 
-      GROUP BY strftime('%m/%Y', created_at)
-      ORDER BY created_at ASC 
-      LIMIT 6
+        TO_CHAR(p.cadastrado_em, 'MM/YYYY') as name,
+        COUNT(*) as cadastros
+      FROM pessoa p
+      WHERE p.cadastrado_em IS NOT NULL
+      GROUP BY TO_CHAR(p.cadastrado_em, 'MM/YYYY')
+      ORDER BY TO_CHAR(p.cadastrado_em, 'YYYY-MM') DESC
+      LIMIT 12
     `);
 
     res.json({
-      totalPessoas: peopleCount[0].total,
-      eventosMes: monthEvents[0].total,
-      totalCheckins: checkins[0].total,
-      engajamento: "72%", // Placeholder para lógica futura de %
-      graph: graphData.length > 0 ? graphData : [
-        { name: 'Jan', cadastros: 10 },
-        { name: 'Fev', cadastros: 25 },
-        { name: 'Mar', cadastros: 45 }
-      ]
+      totalPessoas,
+      eventosMes: eventosMes || 0,
+      totalCheckins,
+      engajamento: engajamento + '%',
+      graph: graphResult.rows
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao buscar estatisticas' });
+    console.error('Erro no stats:', err);
+    res.json({
+      totalPessoas: 0,
+      eventosMes: 0,
+      totalCheckins: 0,
+      engajamento: '0%',
+      graph: []
+    });
   }
 });
 
-// Rota de Ranking de Cadastros (Top usuários que mais cadastraram)
-router.get('/ranking', auth(), async (req, res) => {
-  try {
-    const [rows] = await db.execute(`
-      SELECT u.nome, COUNT(p.id) as total_cadastros
-      FROM usuario u
-      JOIN pessoa p ON u.id = p.cadastrado_por_usuario_id
-      GROUP BY u.id
-      ORDER BY total_cadastros DESC
-      LIMIT 10
-    `);
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao buscar ranking' });
-  }
-});
-
-// Rota de Heatmap (coordenadas dos eventos)
-router.get('/heatmap', auth(), async (req, res) => {
-  try {
-    const [rows] = await db.execute(`
-      SELECT latitude, longitude, COUNT(*) as peso
-      FROM evento
-      WHERE latitude IS NOT NULL AND longitude IS NOT NULL
-      GROUP BY latitude, longitude
-    `);
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao buscar heatmap' });
-  }
-});
-
-module.exports = router;
+export default router;

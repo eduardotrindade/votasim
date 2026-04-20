@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Paper, Button, Grid, Card, CardContent, Alert, CircularProgress } from '@mui/material';
+import { Container, Typography, Box, Paper, Button, Grid, Card, CardContent, Alert, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -10,6 +10,8 @@ export default function CheckinPage() {
   const { eventoId } = useParams();
   const navigate = useNavigate();
   const [evento, setEvento] = useState(null);
+  const [convidados, setConvidados] = useState([]);
+  const [pessoaSelecionada, setPessoaSelecionada] = useState('');
   const [loading, setLoading] = useState(true);
   const [localizacao, setLocalizacao] = useState(null);
   const [erro, setErro] = useState(null);
@@ -17,14 +19,17 @@ export default function CheckinPage() {
   const [checkinloading, setCheckinLoading] = useState(false);
 
   useEffect(() => {
-    loadEvento();
-    getLocalizacao();
+    loadDados();
   }, [eventoId]);
 
-  const loadEvento = async () => {
+  const loadDados = async () => {
     try {
-      const res = await api.get(`/eventos/${eventoId}`);
-      setEvento(res.data);
+      const [eventoRes, convidadosRes] = await Promise.all([
+        api.get(`/eventos/${eventoId}`),
+        api.get(`/eventos/${eventoId}/convidados`)
+      ]);
+      setEvento(eventoRes.data);
+      setConvidados(convidadosRes.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -34,10 +39,9 @@ export default function CheckinPage() {
 
   const getLocalizacao = () => {
     if (!navigator.geolocation) {
-      setErro('Geolocalização não suportada pelo navegador');
+      setErro('Geolocalização não suportada');
       return;
     }
-
     setErro(null);
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -48,13 +52,17 @@ export default function CheckinPage() {
         });
       },
       (err) => {
-        setErro('Não foi possível obter localização: ' + err.message);
+        setErro('Erro ao obter localização: ' + err.message);
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
   const fazerCheckin = async () => {
+    if (!pessoaSelecionada) {
+      alert('Selecione uma pessoa para fazer check-in');
+      return;
+    }
     if (!localizacao) {
       alert('Aguarde a localização ser capturada');
       return;
@@ -63,19 +71,22 @@ export default function CheckinPage() {
     setCheckinLoading(true);
     try {
       await api.post(`/eventos/${eventoId}/checkin`, {
+        pessoa_id: parseInt(pessoaSelecionada),
         latitude: localizacao.latitude,
         longitude: localizacao.longitude
       });
       setSucesso(true);
       setTimeout(() => navigate('/eventos'), 2000);
     } catch (err) {
-      alert('Erro ao fazer check-in');
+      alert('Erro ao fazer check-in: ' + (err.response?.data?.error || err.message));
     } finally {
       setCheckinLoading(false);
     }
   };
 
   if (loading) return <Typography>Carregando...</Typography>;
+
+  const naoConfirmados = convidados.filter(c => !c.presente);
 
   return (
     <DashboardLayout>
@@ -100,6 +111,30 @@ export default function CheckinPage() {
             </Alert>
           ) : (
             <>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Selecione a Pessoa
+                </Typography>
+                <FormControl fullWidth>
+                  <InputLabel>Pessoa</InputLabel>
+                  <Select
+                    value={pessoaSelecionada}
+                    label="Pessoa"
+                    onChange={(e) => setPessoaSelecionada(e.target.value)}
+                  >
+                    {naoConfirmados.length === 0 ? (
+                      <MenuItem value="">Todas já confirmaram</MenuItem>
+                    ) : (
+                      naoConfirmados.map(c => (
+                        <MenuItem key={c.pessoa_id} value={c.pessoa_id}>
+                          {c.nome}
+                        </MenuItem>
+                      ))
+                    )}
+                  </Select>
+                </FormControl>
+              </Box>
+
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   Localização Atual
@@ -140,8 +175,8 @@ export default function CheckinPage() {
                 variant="contained"
                 size="large"
                 fullWidth
-                onClick={fazerCheckin}
-                disabled={!localizacao || checkinloading}
+                onClick={() => fazerCheckin()}
+                disabled={!localizacao || !pessoaSelecionada || checkinloading}
                 startIcon={<CheckCircleIcon />}
               >
                 {checkinloading ? 'Processando...' : 'Confirmar Check-in'}

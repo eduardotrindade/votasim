@@ -1,0 +1,23 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+
+# Uploads
+uploads/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+output.txt
+error.txt
+
+# OS
+.DS_Store
+Thumbs.db

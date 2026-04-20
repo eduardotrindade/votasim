@@ -1,51 +1,69 @@
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import { existsSync, mkdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { query } from './config/db.js';
+import { inicializarTabelas } from './setup.js';
+import authRoutes from './routes/auth.js';
+import pessoasRoutes from './routes/pessoas.js';
+import eventosRoutes from './routes/eventos.js';
+import agrupamentosRoutes from './routes/agrupamentos.js';
+import regioesRoutes from './routes/regioes.js';
+import dashboardRoutes from './routes/dashboard.js';
+import uploadRoutes from './routes/upload.js';
+import PapeisRoutes from './routes/papeis.js';
+import vinculosRoutes from './routes/vinculos.js';
 
-const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 const app = express();
+const PORT = process.env.PORT || 3001;
+
+const uploadDir = join(dirname(fileURLToPath(import.meta.url)), '../uploads');
+if (!existsSync(uploadDir)) {
+  mkdirSync(uploadDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadDir));
+
 app.use(cors({
-  origin: [frontendUrl, 'https://*.vercel.app']
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-const authRoutes = require('./routes/auth');
-const pessoaRoutes = require('./routes/pessoa');
-const eventoRoutes = require('./routes/evento');
-const dashboardRoutes = require('./routes/dashboard');
-const regiaoRoutes = require('./routes/regiao');
-const usuarioRoutes = require('./routes/usuario');
-const agrupamentoRoutes = require('./routes/agrupamento');
-const importRoutes = require('./routes/import');
-
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Middlewares e Rotas
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
-app.get('/ping', (req, res) => {
-  res.json({ message: 'pong' });
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+  next();
 });
 
+await inicializarTabelas();
+
 app.use('/auth', authRoutes);
-app.use('/pessoas', pessoaRoutes);
-app.use('/eventos', eventoRoutes);
+app.use('/pessoas', pessoasRoutes);
+app.use('/eventos', eventosRoutes);
+app.use('/agrupamentos', agrupamentosRoutes);
+app.use('/regioes', regioesRoutes);
 app.use('/dashboard', dashboardRoutes);
-app.use('/regioes', regiaoRoutes);
-app.use('/usuarios', usuarioRoutes);
-app.use('/agrupamentos', agrupamentoRoutes);
-app.use('/import', importRoutes);
+app.use('/api', uploadRoutes);
+app.use('/papeis', PapeisRoutes);
+app.use('/vinculos', vinculosRoutes);
 
-// Exportar para que possamos iniciar o servidor via um server.js (opcional) ou diretamente aqui
-// Garantir pasta de uploads
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+app.get('/health', async (req, res) => {
+  try {
+    await query('SELECT 1');
+    res.json({ status: 'OK', database: 'connected', timestamp: new Date().toISOString() });
+  } catch (error) {
+    res.json({ status: 'OK', database: 'disconnected', timestamp: new Date().toISOString() });
+  }
+});
 
-const PORT = process.env.PORT || 3001;
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Erro interno no servidor' });
+});
+
 app.listen(PORT, () => {
-    console.log(`API rodando na porta ${PORT}`);
+  console.log(`🚀 Servidor VotaSim rodando em http://localhost:${PORT}`);
+  console.log(`📋 Acesse: http://localhost:5173 para o Frontend`);
 });

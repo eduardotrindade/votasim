@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { AppBar, Toolbar, Typography, Box, IconButton, CssBaseline, Button } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box, IconButton, CssBaseline, Button, Avatar } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { AuthContext } from '../contexts/AuthContext';
 import Sidebar from './Sidebar';

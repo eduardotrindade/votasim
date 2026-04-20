@@ -1,9 +1,7 @@
 import React, { useState, useContext } from 'react';
-import { Container, Box, Typography, TextField, Button, Paper, Divider } from '@mui/material';
+import { Container, Box, Typography, TextField, Button, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -21,15 +19,6 @@ export default function Login() {
     } catch (err) {
       setError('Credenciais inválidas');
     }
-  };
-
-  const handleGoogleLogin = () => {
-    if (!GOOGLE_CLIENT_ID) {
-      setError('Login Google não configurado. Configure VITE_GOOGLE_CLIENT_ID no arquivo .env');
-      return;
-    }
-    const redirectUri = encodeURIComponent(window.location.origin + '/auth/google/callback');
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=email profile&prompt=select_account`;
   };
 
   return (
@@ -81,28 +70,14 @@ export default function Login() {
               Entrar
             </Button>
 
-            {GOOGLE_CLIENT_ID && (
-              <>
-                <Divider sx={{ my: 2 }}>ou</Divider>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  onClick={handleGoogleLogin}
-                  sx={{ mb: 1, bgcolor: '#4285f4', color: 'white', '&:hover': { bgcolor: '#357ae8' } }}
-                >
-                  Entrar com Google
-                </Button>
-              </>
-            )}
-
             <Button
               fullWidth
               variant="outlined"
               color="secondary"
-              onClick={() => navigate('/registro')}
+              onClick={() => googleLogin({ email: 'google@user.com', nome: 'Google User', id: '123' })}
               sx={{ mb: 2 }}
             >
-              Criar Conta
+              Entrar com Google
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>

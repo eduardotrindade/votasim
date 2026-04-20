@@ -36,16 +36,6 @@ export default function PessoasPage({ meOnly = false }) {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta pessoa?')) return;
-    try {
-      await api.delete(`/pessoas/${id}`);
-      carregarPessoas();
-    } catch (err) {
-      alert('Erro ao excluir pessoa');
-    }
-  };
-
   const exportarCSV = () => {
     if (pessoas.length === 0) return;
     
@@ -141,8 +131,8 @@ export default function PessoasPage({ meOnly = false }) {
                     <Chip label={row.ativo ? "Ativo" : "Inativo"} color={row.ativo ? "success" : "default"} size="small" />
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton size="small" color="primary" onClick={() => navigate(`/pessoas/editar/${row.id}`)}><EditIcon /></IconButton>
-                    <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}><DeleteIcon /></IconButton>
+                    <IconButton size="small" color="primary"><EditIcon /></IconButton>
+                    <IconButton size="small" color="error"><DeleteIcon /></IconButton>
                   </TableCell>
                 </TableRow>
               ))

@@ -1,36 +1,30 @@
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
-const sqliteSchema = require('./sqliteSchema');
-require('dotenv').config();
+import pg from 'pg';
+const { Pool } = pg;
 
-let dbInstance = null;
+const connectionString = process.env.DATABASE_URL || process.env.DB_URI || 'postgresql://postgres:Vot@sim@2026@db.ichogtsktsvmeyiyyoem.supabase.co:5432/postgres';
 
-async function getDb() {
-  if (!dbInstance) {
-    dbInstance = await open({
-      filename: './database.sqlite',
-      driver: sqlite3.Database
-    });
-    // Create tables on startup
-    await dbInstance.exec(sqliteSchema);
+const pool = new Pool({
+  connectionString,
+  ssl: {
+    rejectUnauthorized: false
   }
-  return dbInstance;
+});
+
+pool.on('error', (err) => {
+  console.error('Erro inesperado no PostgreSQL', err);
+});
+
+export async function query(text, params) {
+  const start = Date.now();
+  const res = await pool.query(text, params);
+  const duration = Date.now() - start;
+  console.log('Executou query', { text: text.substring(0, 50), duration, rows: res.rowCount });
+  return res;
 }
 
-// Polyfill to match the mysql2 'execute' method signature
-const pool = {
-  execute: async (sql, params = []) => {
-    const db = await getDb();
-    
-    // Convert ? to SQLite parameters if needed (they use the same ? syntax)
-    if (sql.trim().toUpperCase().startsWith('SELECT')) {
-      const rows = await db.all(sql, params);
-      return [rows]; // Return tuple matching mysql2: [rows, fields]
-    } else {
-      const result = await db.run(sql, params);
-      return [{ insertId: result.lastID, affectedRows: result.changes }];
-    }
-  }
-};
+export async function getClient() {
+  const client = await pool.connect();
+  return client;
+}
 
-module.exports = pool;
+export default { query, getClient, pool };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox, Button, Chip, IconButton } from '@mui/material';
+import { Container, Typography, Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox, Button, Chip } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import DashboardLayout from '../components/DashboardLayout';
@@ -91,7 +91,6 @@ export default function ConvitePessoasPage() {
           </Button>
         </Box>
 
-        {/* Convidados */}
         <Paper sx={{ mb: 3, p: 2 }}>
           <Typography variant="h6" gutterBottom>Convidados ({convidados.length})</Typography>
           {convidados.length === 0 ? (
@@ -142,7 +141,6 @@ export default function ConvitePessoasPage() {
           )}
         </Paper>
 
-        {/* Convidar */}
         <Paper sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>Selecione pessoas para convidar ({selected.length} selecionadas)</Typography>
           {pessoas.length === 0 ? (

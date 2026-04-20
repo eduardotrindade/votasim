@@ -1,54 +1,59 @@
-import React, { useState } from 'react';
-import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress } from '@mui/material';
 import api from '../services/api';
-import { useEffect } from 'react';
 
 export default function RankingPage() {
   const [ranking, setRanking] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/dashboard/ranking').then(res => setRanking(res.data)).catch(err => console.error(err));
+    api.get('/dashboard/ranking')
+      .then(res => {
+        setRanking(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
+
+  if (loading) return <LinearProgress />;
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
-        Ranking de Cadastros
+      <Typography variant="h4" fontWeight="bold" gutterBottom>Ranking de Cadastros</Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        Acompanhe os usuários que mais contribuíram com novos cadastros no sistema.
       </Typography>
 
-      <TableContainer component={Paper} sx={{ borderRadius: 2, mb: 4 }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
         <Table>
-          <TableHead sx={{ bgcolor: 'rgba(0,0,0,0.03)' }}>
+          <TableHead sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
             <TableRow>
-              <TableCell>#</TableCell>
-              <TableCell>Usuário</TableCell>
-              <TableCell align="center">Total de Cadastros</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Posição</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Usuário</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total de Cadastros</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {ranking.map((row, index) => (
-              <TableRow key={row.nome}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>{row.nome}</TableCell>
-                <TableCell align="center">{row.total_cadastros}</TableCell>
+              <TableRow key={index} hover>
+                <TableCell>{index + 1}º</TableCell>
+                <TableCell sx={{ fontWeight: '500' }}>{row.nome}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                  {row.total}
+                </TableCell>
               </TableRow>
             ))}
+            {ranking.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={3} align="center">Nenhum dado disponível no momento.</TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
-
-      <Typography variant="h6" sx={{ mb: 2 }}>Gráfico de Desempenho</Typography>
-      <Paper sx={{ p: 2, borderRadius: 2, height: 300 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={ranking} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-            <XAxis type="number" />
-            <YAxis type="category" dataKey="nome" width={100} />
-            <Tooltip />
-            <Bar dataKey="total_cadastros" fill="#2E7D32" radius={[0, 4, 4, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Paper>
     </Box>
   );
 }

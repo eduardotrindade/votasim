@@ -42,7 +42,6 @@ export default function FotosEventoPage() {
   };
 
   const handleUploadFoto = async () => {
-    console.log('eventoId:', eventoId, 'fileFoto:', fileFoto);
     if (!urlFoto && !fileFoto) {
       alert('Selecione uma imagem ou cole uma URL');
       return;
@@ -56,16 +55,14 @@ export default function FotosEventoPage() {
         const res = await api.post(`/eventos/${eventoId}/fotos/upload`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        console.log('Upload response:', res.data);
         setFileFoto(null);
       } else {
-        await api.post(`/eventos/${eventoId}/fotos`, { foto: urlFoto });
+        await api.post(`/eventos/${eventoId}/fotos`, { url: urlFoto });
         setUrlFoto('');
       }
       loadData();
       alert('Foto adicionada!');
     } catch (err) {
-      console.error('Erro upload:', err);
       const msg = err.response?.data?.error || err.message || 'Erro ao adicionar foto';
       alert('Erro: ' + msg);
     } finally {
@@ -115,7 +112,6 @@ export default function FotosEventoPage() {
           {evento?.data} - {evento?.regiao_nome}
         </Typography>
 
-        {/* Estatísticas */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={4}>
             <Card>
@@ -143,14 +139,12 @@ export default function FotosEventoPage() {
           </Grid>
         </Grid>
 
-        {/* Upload de foto */}
         <Paper sx={{ p: 3, mb: 3 }}>
           <Typography variant="h6" gutterBottom>
             <PhotoLibraryIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
             Adicionar Foto
           </Typography>
           
-          {/* Upload por arquivo */}
           <Box sx={{ mb: 2 }}>
             <input
               type="file"
@@ -198,7 +192,6 @@ export default function FotosEventoPage() {
           </Box>
         </Paper>
 
-        {/* Galeria de fotos */}
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
             Galeria de Fotos ({fotos.length})
@@ -216,7 +209,7 @@ export default function FotosEventoPage() {
                     <CardMedia
                       component="img"
                       height="150"
-                      image={foto.foto}
+                      image={foto.url}
                       alt="Foto do evento"
                       sx={{ objectFit: 'cover' }}
                       onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Imagem+não+disponível'; }}
@@ -234,14 +227,14 @@ export default function FotosEventoPage() {
                     >
                       <DeleteIcon fontSize="small" color="error" />
                     </IconButton>
-                    {foto.localizacao_foto && (
+                    {(foto.latitude || foto.longitude) && (
                       <Box sx={{ position: 'absolute', bottom: 4, left: 4, display: 'flex', alignItems: 'center' }}>
                         <LocationOnIcon fontSize="small" sx={{ color: 'white', textShadow: '1px 1px 2px black' }} />
                       </Box>
                     )}
                     <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
                       <Typography variant="caption" display="block">
-                        {new Date(foto.cadastrado_em).toLocaleDateString()}
+                        {new Date(foto.created_at).toLocaleDateString()}
                       </Typography>
                     </CardContent>
                   </Card>

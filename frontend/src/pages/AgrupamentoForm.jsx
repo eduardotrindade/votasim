@@ -9,16 +9,20 @@ export default function AgrupamentoForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nome: '',
+    pessoa_referencia_id: '',
     regiao_id: '',
     endereco: '',
     cep: '',
     observacao: ''
   });
   const [regioes, setRegioes] = useState([]);
+  const [pessoas, setPessoas] = useState([]);
   const [feedback, setFeedback] = useState({ open: false, msg: '', type: 'success' });
 
   useEffect(() => {
+    // Carregar Regiões e Pessoas para dropdowns
     api.get('/regioes').then(res => setRegioes(res.data)).catch(() => {});
+    api.get('/pessoas').then(res => setPessoas(res.data)).catch(() => {});
   }, []);
 
   const handleChange = (e) => {
@@ -36,14 +40,14 @@ export default function AgrupamentoForm() {
       setFeedback({ open: true, msg: 'Agrupamento criado com sucesso!', type: 'success' });
       setTimeout(() => navigate('/agrupamentos'), 1500);
     } catch (error) {
-      setFeedback({ open: true, msg: 'Erro ao salvar o agrupamento.', type: 'error' });
+      setFeedback({ open: true, msg: 'Erro ao salvar agrupamento.', type: 'error' });
     }
   };
 
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/')} sx={{ mr: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ mr: 2 }}>
           Voltar
         </Button>
         <Typography variant="h5" fontWeight="bold">Novo Agrupamento</Typography>
@@ -53,35 +57,44 @@ export default function AgrupamentoForm() {
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Nome *" name="nome" value={formData.nome} onChange={handleChange} />
+              <TextField fullWidth label="Nome do Agrupamento *" name="nome" value={formData.nome} onChange={handleChange} />
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField select fullWidth label="Região *" name="regiao_id" value={formData.regiao_id} onChange={handleChange}>
-                {regioes.map(r => (
+                {regioes.map((r) => (
                   <MenuItem key={r.id} value={r.id}>{r.nome}</MenuItem>
                 ))}
               </TextField>
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField fullWidth label="Endereço" name="endereco" value={formData.endereco} onChange={handleChange} />
+              <TextField select fullWidth label="Pessoa de Referência" name="pessoa_referencia_id" value={formData.pessoa_referencia_id} onChange={handleChange}>
+                <MenuItem value="">Nenhuma</MenuItem>
+                {pessoas.map((p) => (
+                  <MenuItem key={p.id} value={p.id}>{p.nome}</MenuItem>
+                ))}
+              </TextField>
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField fullWidth label="CEP" name="cep" value={formData.cep} onChange={handleChange} />
             </Grid>
             <Grid item xs={12}>
+              <TextField fullWidth label="Endereço Completo" name="endereco" value={formData.endereco} onChange={handleChange} />
+            </Grid>
+            <Grid item xs={12}>
               <TextField fullWidth label="Observações" multiline rows={3} name="observacao" value={formData.observacao} onChange={handleChange} />
             </Grid>
+            
             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
               <Button type="submit" variant="contained" color="primary" size="large" startIcon={<SaveIcon />}>
-                Criar Agrupamento
+                Salvar Agrupamento
               </Button>
             </Grid>
           </Grid>
         </form>
       </Paper>
 
-      <Snackbar open={feedback.open} autoHideDuration={4000} onClose={() => setFeedback({...feedback, open: false})} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert severity={feedback.type} sx={{ width: '100%' }}>{feedback.msg}</Alert>
+      <Snackbar open={feedback.open} autoHideDuration={4000} onClose={() => setFeedback({...feedback, open: false})}>
+        <Alert severity={feedback.type}>{feedback.msg}</Alert>
       </Snackbar>
     </Box>
   );

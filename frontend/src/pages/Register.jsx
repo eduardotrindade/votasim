@@ -1,33 +1,26 @@
 import React, { useState, useContext } from 'react';
-import { Container, Box, Typography, TextField, Button, Paper, Alert } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Container, Box, Typography, TextField, Button, Paper, Snackbar, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
 export default function Register() {
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [telefone, setTelefone] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState({ nome: '', email: '', senha: '', telefone: '' });
+  const [feedback, setFeedback] = useState({ open: false, msg: '', type: 'success' });
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setError('');
-      if (!nome || !email || !senha) {
-        setError('Preencha todos os campos obrigatórios');
-        return;
-      }
-      await register({ nome, email, senha, telefone });
-      setSuccess(true);
+      await register(formData);
+      setFeedback({ open: true, msg: 'Solicitação enviada! Aguarde ativação.', type: 'success' });
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Erro ao registrar';
-      setError(msg.includes('já cadastrado') ? 'Este email já está cadastrado no sistema.' : msg);
+      setFeedback({ open: true, msg: 'Erro ao solicitar conta.', type: 'error' });
     }
   };
 
@@ -35,81 +28,30 @@ export default function Register() {
     <Container maxWidth="xs">
       <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Paper elevation={3} sx={{ p: 4, width: '100%', borderRadius: 2 }}>
-          <Typography component="h1" variant="h4" align="center" color="primary" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Vota.Sim
-          </Typography>
-          <Typography component="h2" variant="h6" align="center" gutterBottom>
-            Criar Conta
+          <Typography component="h1" variant="h5" align="center" color="primary" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Solicitar Conta
           </Typography>
           
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              Conta criada! Redirecionando...
-            </Alert>
-          )}
-
-          <Box component="form" onSubmit={handleRegister} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              label="Nome Completo"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              label="Senha"
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              fullWidth
-              label="Telefone"
-              value={telefone}
-              onChange={(e) => setTelefone(e.target.value)}
-            />
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+            <TextField margin="normal" required fullWidth label="Nome Completo" name="nome" autoFocus value={formData.nome} onChange={handleChange} />
+            <TextField margin="normal" required fullWidth label="Email" name="email" value={formData.email} onChange={handleChange} />
+            <TextField margin="normal" required fullWidth label="Celular" name="telefone" value={formData.telefone} onChange={handleChange} />
+            <TextField margin="normal" required fullWidth label="Senha" name="senha" type="password" value={formData.senha} onChange={handleChange} />
             
-            {error && (
-              <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                {error}
-              </Typography>
-            )}
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              sx={{ mt: 3, mb: 1 }}
-            >
-              Criar Conta
+            <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2 }}>
+              Enviar Solicitação
             </Button>
-
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button onClick={() => navigate('/login')} startIcon={<ArrowBackIcon />} sx={{ textTransform: 'none' }}>
-                Voltar
-              </Button>
-              <Button onClick={() => navigate('/login')} sx={{ textTransform: 'none' }}>
-                Já tem conta? Entrar
-              </Button>
-            </Box>
+            
+            <Button fullWidth onClick={() => navigate('/login')} sx={{ textTransform: 'none' }}>
+              Voltar para Login
+            </Button>
           </Box>
         </Paper>
       </Box>
+
+      <Snackbar open={feedback.open} autoHideDuration={4000} onClose={() => setFeedback({...feedback, open: false})}>
+        <Alert severity={feedback.type}>{feedback.msg}</Alert>
+      </Snackbar>
     </Container>
   );
 }

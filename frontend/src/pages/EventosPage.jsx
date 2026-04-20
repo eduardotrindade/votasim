@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Box, Typography, Button, Grid, Card, CardContent, CardActions, Chip, CircularProgress, Snackbar, Alert, TextField, InputAdornment, Paper
+  Box, Typography, Button, Grid, Card, CardContent, CardActions, Chip, CircularProgress, Snackbar, Alert, TextField, InputAdornment, Paper, IconButton
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import RoomIcon from '@mui/icons-material/Room';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import SearchIcon from '@mui/icons-material/Search';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import PeopleIcon from '@mui/icons-material/People';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 
 export default function EventosPage({ meOnly = false }) {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const [eventos, setEventos] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -54,11 +54,15 @@ export default function EventosPage({ meOnly = false }) {
     navigator.geolocation.getCurrentPosition(async (position) => {
       try {
         const { latitude, longitude } = position.coords;
-        await api.post(`/eventos/${eventoId}/checkin`, { latitude, longitude });
-        setFeedback({ open: true, msg: 'Check-in Geolocalizado salvo com sucesso!', type: 'success' });
+        await api.post(`/eventos/${eventoId}/checkin`, { 
+          pessoa_id: user?.id, 
+          latitude, 
+          longitude 
+        });
+        setFeedback({ open: true, msg: '📍 Check-in salvo com sucesso!', type: 'success' });
         carregarEventos();
       } catch (error) {
-         setFeedback({ open: true, msg: 'Erro ao registrar check-in.', type: 'error' });
+         setFeedback({ open: true, msg: 'Erro ao registrar check-in: ' + (error.response?.data?.error || error.message), type: 'error' });
       } finally {
          setLoadingConfig({ id: null, loading: false });
       }
@@ -158,37 +162,39 @@ export default function EventosPage({ meOnly = false }) {
                   </Box>
                   <Box sx={{ mt: 2 }}>
                      {evento.check_in 
-                        ? <Chip size="small" label="Check-in Finalizado" color="success" />
+                        ? <Chip size="small" label="Check-in Finalizado ✅" color="success" />
                         : <Chip size="small" label="Aguardando Check-in" color="warning" />
                      }
                   </Box>
                 </CardContent>
-<CardActions sx={{ bgcolor: 'rgba(0,0,0,0.02)', justifyContent: 'space-between', p: 2 }}>
-                   <Box>
-                     <Button 
-                       size="small" 
-                       startIcon={<PeopleIcon />}
-                       onClick={() => navigate(`/eventos/${evento.id}/convite`)}
-                     >
-                       Convite/Lista
-                     </Button>
-                     <Button 
-                       size="small" 
-                       startIcon={<PhotoLibraryIcon />}
-                       onClick={() => navigate(`/eventos/${evento.id}/fotos`)}
-                     >
-                       Fotos
-                     </Button>
-                   </Box>
-                   <Button 
-                      variant="contained" 
-                      color="primary" 
-                      onClick={() => fazerCheckin(evento.id)}
-                      disabled={evento.check_in || loadingConfig.id === evento.id}
-                      startIcon={loadingConfig.id === evento.id ? <CircularProgress size={20} color="inherit" /> : evento.check_in ? <CheckCircleIcon /> : <RoomIcon />} 
-                   >
-                     {evento.check_in ? 'Check-in OK' : 'Check-in'}
-                   </Button>
+<CardActions sx={{ bgcolor: 'rgba(0,0,0,0.02)', justifyContent: 'space-between', p: 2, gap: 1 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton 
+                      size="small" 
+                      color="primary"
+                      title="Convidar Pessoas"
+                      onClick={() => navigate(`/eventos/${evento.id}/convite`)}
+                    >
+                      <HowToRegIcon />
+                    </IconButton>
+                    <IconButton 
+                      size="small" 
+                      color="secondary"
+                      title="Fotos do Evento"
+                      onClick={() => navigate(`/eventos/${evento.id}/fotos`)}
+                    >
+                      <PhotoLibraryIcon />
+                    </IconButton>
+                  </Box>
+                  <Button 
+                     variant="contained" 
+                     color="primary" 
+                     onClick={() => fazerCheckin(evento.id)}
+                     disabled={evento.check_in || loadingConfig.id === evento.id}
+                     startIcon={loadingConfig.id === evento.id ? <CircularProgress size={20} color="inherit" /> : <RoomIcon />} 
+                  >
+                     Check-in (GPS)
+                  </Button>
                 </CardActions>
               </Card>
             </Grid>

@@ -12,13 +12,16 @@ export default function PessoaForm() {
     email: '',
     telefone: '',
     data_nascimento: '',
-    observacao: '',
-    agrupamento_id: ''
+    papel_id: '',
+    agrupamento_id: '',
+    observacao: ''
   });
+  const [papeis, setPapeis] = useState([]);
   const [agrupamentos, setAgrupamentos] = useState([]);
   const [feedback, setFeedback] = useState({ open: false, msg: '', type: 'success' });
 
   useEffect(() => {
+    api.get('/papeis').then(res => setPapeis(res.data)).catch(() => {});
     api.get('/agrupamentos').then(res => setAgrupamentos(res.data)).catch(() => {});
   }, []);
 
@@ -28,17 +31,19 @@ export default function PessoaForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      if (!formData.nome || !formData.email) {
-         setFeedback({ open: true, msg: 'Nome e Email são obrigatórios!', type: 'error' });
+    
+if (!formData.nome) {
+         setFeedback({ open: true, msg: 'Nome é obrigatório!', type: 'error' });
          return;
       }
+    
+    try {
+      setFeedback({ open: true, msg: 'Salvando...', type: 'info' });
       await api.post('/pessoas', formData);
       setFeedback({ open: true, msg: 'Cadastro realizado com sucesso!', type: 'success' });
-      
       setTimeout(() => navigate('/pessoas'), 1500);
     } catch (error) {
-      const msg = error.response?.data?.error || 'Erro ao salvar o cadastro.';
+      const msg = error.response?.data?.error || error.message || 'Erro ao salvar';
       setFeedback({ open: true, msg: msg, type: 'error' });
     }
   };
@@ -61,10 +66,25 @@ export default function PessoaForm() {
             <Grid item xs={12} md={6}>
               <TextField fullWidth type="email" label="Email *" name="email" value={formData.email} onChange={handleChange} />
             </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField fullWidth label="Telefone" name="telefone" value={formData.telefone} onChange={handleChange} />
-            </Grid>
-            <Grid item xs={12} md={4}>
+<Grid item xs={12} md={4}>
+               <TextField fullWidth label="Telefone" name="telefone" value={formData.telefone} onChange={handleChange} />
+             </Grid>
+             <Grid item xs={12} md={4}>
+               <TextField 
+                 select 
+                 fullWidth 
+                 label="Papel" 
+                 name="papel_id" 
+                 value={formData.papel_id || ''} 
+                 onChange={handleChange}
+               >
+                 <MenuItem value="">Selecione...</MenuItem>
+                 {papeis.map(p => (
+                   <MenuItem key={p.id} value={p.id}>{p.papel}</MenuItem>
+                 ))}
+               </TextField>
+             </Grid>
+             <Grid item xs={12} md={4}>
                <TextField 
                  fullWidth 
                  label="Data de Nascimento" 

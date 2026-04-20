@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
         if (decoded.exp * 1000 < Date.now()) {
           logout();
         } else {
+          // You could fetch fresh user data here if needed
           setUser(decoded);
           api.defaults.headers.Authorization = `Bearer ${token}`;
         }
